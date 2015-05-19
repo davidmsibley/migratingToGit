@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# gitwash - accept a stream in fast order and canonicalize it.
+#
+# FIXME: stop deleting author and committer lines when we fix tmesone screwage.
+#
+rm -fr /tmp/gitwash*
+mkdir /tmp/gitwash$$
+cd /tmp/gitwash$$
+
+git init --quiet
+git fast-import --quiet
+git fast-export --all | sed -e '/author/d' -e '/committer/d'
+rm -fr /tmp/gitwash$$
+
+#end

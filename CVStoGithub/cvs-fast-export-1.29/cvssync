@@ -1,0 +1,123 @@
+#!/usr/bin/python
+"""
+cvssync - fetch a CVS repository using rsync
+
+This tool is a front end for rsync that attempts to deduce how to get
+a copy of a CVS repository by analyzing the arguments you are told
+to pass CVS to check out a copy.
+
+The magic (when there is any) is in knowing how to construct the
+actual path to the repository from the host, path and module arguments.
+"""
+
+# Hosting-site rules live inside the following function.
+
+def computesource(sourcehost, sourcepath, sourcemodule):
+    "Compute an rsync source given a CVS sourcehost, sourcepath, and sourcemodule"
+    if "sourceforge" in sourcehost:
+        # Supply the  /cvsroot path head if not given.
+        if not sourcepath.startswith("/cvsroot"):
+            sourcepath = "/cvsroot" + sourcepath
+        # Deal with the Sourceforge convention for naming project
+        # pseudohosts.  This does it in a backwards-compatible way.
+        project = sourcepath.split("/")[-1]
+        if not sourcehost.startswith(project + "."):
+            sourcehost = project + "." + sourcehost
+        # On SourceForge you need to double the colon and strip the
+        # leading / to invoke the rsync module facility.
+        return "%s::%s/%s/" % (sourcehost, sourcepath[1:], sourcemodule)
+    elif "berlios" in sourcehost:
+        # The pattern is rsync -av cvs.berlios.de::<projectname>_cvs cvs
+        return "cvs.berlios.de::%s_cvs" % sourcemodule
+    elif "sourceware" in sourcehost:
+        # The pattern is rsync -av sourceware.org::<projectname>-cvs/<module>/
+        return "%s::%s-cvs/%s/" % (sourcehost, sourcepath.split('/')[2], sourcemodule)
+    elif "savannah" in sourcehost:
+        # Supply the  /sources path head if not given.
+        if not sourcepath.startswith("/sources"):
+            sourcepath = "/sources" + sourcepath
+        return "rsync://vcs.savannah.gnu.org%s/%s/" % (sourcepath, sourcemodule)
+    else:
+        return "%s:%s/%s/" % (sourcehost, sourcepath, sourcemodule)
+
+# You should not need to modify anything below this line
+
+import os, sys, getopt, subprocess
+
+verbose = False
+execute = True
+
+def do_or_die(dcmd):
+    "Either execute a command or raise a fatal exception."
+    if verbose:
+        sys.stdout.write("cvssync: executing '%s'\n" % (dcmd,))
+    if execute:
+        try:
+            retcode = subprocess.call(dcmd, shell=True)
+            if retcode < 0:
+                sys.stderr.write("cvssync: child was terminated by signal %d.\n" % -retcode)
+                sys.exit(1)
+            elif retcode != 0:
+                sys.stderr.write("cvssync: child returned %d.\n" % retcode)
+                sys.exit(1)
+        except (OSError, IOError) as e:
+            sys.stderr.write("cvssync: execution of %s failed: %s\n" % (dcmd, e))
+            sys.exit(1)
+
+if __name__ == '__main__':
+
+    (opts, arguments) = getopt.getopt(sys.argv[1:], "cno:v")
+    oopt = None
+    checkoutable = False
+    for (opt, arg) in opts:
+        if opt == '-c':
+            checkoutable = True
+        if opt == '-n':
+            execute = False
+        if opt == '-o':
+            oopt = arg
+        if opt == '-v':
+            verbose += 1
+
+    if len(arguments) == 1 and arguments[0].startswith("cvs://"):
+        try:
+            (host, module) = arguments[0][6:].split("#")
+            i = host.find('/')
+            (host, path) = (host[:i], host[i:])
+            if "@" in host:
+                host = host.split("@")[1]
+        except ValueError:
+            sys.stderr.write("cvssync: ill-formed CVS URL\n")
+            sys.exit(1)
+    elif len(arguments) == 2:
+        host = arguments[0]
+        module = arguments[1]
+        if "@" in host:
+            host = host.split("@")[1]
+        if ":" not in host:
+            sys.stderr.write("cvssync: repository path is missing.\n")
+            sys.exit(1)
+        (host, path) = host.split(":")
+    else:
+        sys.stderr.write("cvssync: requires a host/path and module argument\n")
+        sys.exit(1)
+
+    if verbose:
+        print "host = %s, path = %s, module = %s" % (host, path, module)
+
+    directory = oopt or module
+    vopt = "v" if verbose else ""
+
+    source = computesource(host, path, module)
+
+    if checkoutable:
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+        dummyroot = os.path.join(directory, "CVSROOT")
+        if not os.path.exists(dummyroot):
+            os.mkdir(dummyroot)
+        directory = os.path.join(directory, module)
+
+    do_or_die("rsync -a%sz %s %s" % (vopt, source, directory))
+
+# end

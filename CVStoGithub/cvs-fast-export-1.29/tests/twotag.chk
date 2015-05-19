@@ -1,0 +1,81 @@
+blob
+mark :1
+data 43
+Alve bazige froulju wachtsje op dyn komst.
+
+blob
+mark :2
+data 46
+The quick brown fox jumped over the lazy dog.
+
+commit refs/heads/master
+mark :3
+committer foo <foo> 101800 +0000
+data 25
+An example first checkin
+
+M 100644 :1 tweedledee
+M 100644 :2 tweedledum
+M 100644 inline .gitignore
+data 198
+# CVS default ignores begin
+tags
+TAGS
+.make.state
+.nse_depinfo
+*~
+#*
+.#*
+,*
+_$*
+*$
+*.old
+*.bak
+*.BAK
+*.orig
+*.rej
+.del-*
+*.a
+*.olb
+*.o
+*.obj
+*.so
+*.exe
+*.Z
+*.elc
+*.ln
+core
+# CVS default ignores end
+
+property cvs-revision 30 tweedledee 1.1
+tweedledum 1.1
+
+blob
+mark :4
+data 38
+Lynx c.q. vos prikt bh: dag zwemjuf!.
+
+blob
+mark :5
+data 47
+Portez ce vieux whisky au juge blond qui fume.
+
+commit refs/heads/master
+mark :6
+committer foo <foo> 103600 +0000
+data 26
+An example second checkin
+
+from :3
+M 100644 :4 tweedledee
+M 100644 :5 tweedledum
+property cvs-revision 30 tweedledee 1.2
+tweedledum 1.2
+
+reset refs/tags/FUBAR
+from :6
+
+reset refs/heads/master
+from :6
+
+done

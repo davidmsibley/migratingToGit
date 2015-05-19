@@ -1,0 +1,2 @@
+#!/bin/bash
+find $1 -name '*,v' -type f -print0 | xargs -0 egrep '^date.*author' | awk '{print $4}' | awk -F';' '{print $1}' | sort | uniq | xargs -n1 perl -e 'print($ARGV[0]," = ",(getpwnam($ARGV[0]))[6]," <$ARGV[0]\@usgs.gov>\n")' > authormap

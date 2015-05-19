@@ -1,0 +1,57 @@
+head	1.2;
+access;
+symbols;
+locks; strict;
+comment	@# @;
+
+1.2
+date	2004.03.26.02.37.04;	author dprice;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2001.03.14.11.27.37;	author dprice;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2006.06.30.13.21.39;	author dprice;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+1.2
+log
+@72b08886805045542b2653782b7f52f0
+@
+text
+@Makefile.am,v content for 1.2
+@
+
+
+1.1
+log
+@da091809da59e576ff757e9779ed1821
+@
+text
+@d1 1
+a1 1
+Makefile.am,v content for 1.1
+@
+
+
+1.1.1.1
+log
+@adec3217e3975f36407dbf470ddaf5e9
+@
+text
+@d1 1
+a1 1
+Makefile.am,v content for 1.1.1.1
+@
+
+

@@ -1,0 +1,178 @@
+#!/usr/bin/env python
+"""
+cvsreduce - skeletonize CVS master files
+
+Called as a filter, skeletonizes a CVS master presented on standard input
+and write it to standard output. If an argument is specified, it must be
+the name of a directory containing CVS master files; in that case a
+corresponding directory of stripped files is created.
+
+Options:
+   -o dir  Set name of output directory. Defaults to the input dirname
+           with the suffix '-reduced'.
+   -t      Suppress stripping of (non-sticky) tags.  Sticky tags are
+           always preserved.
+   -l      Suppress replacement of log content with a hash.
+   -c      Suppress replacement of revision content.
+   -v      Enable progress messages.
+
+Default behavior is to strip non-sticky tags, replace each version
+of content with a unique string including the revision ID, and
+replace log text with its MD5 hash in hex.
+
+The only identifying information left in the tree is filenames and CVS
+user IDs.
+
+The intent is to discard bulky content but preserve all metadata
+relevant to changeset merging. A collection of stripped files should
+imply the same changeset DAG as the unstripped originals, but be
+easier to pass around, faster to process, and not reveal potentially
+sensitive data.
+"""
+import os, sys, getopt, hashlib
+
+strip_tags = True
+strip_logs = True
+strip_content = True
+verbose = 0
+
+def replace_escaped_text(inputf, replacement, outputf):
+    "Replace text between @ delimiters with a specified string."
+    leader = inputf.read(1)
+    if leader != '@':
+        sys.stderr.write("cvsreduce: fatal error, @ leader not where expected.\n")
+        sys.exit(1)
+    else:
+        outputf.write('@' + replacement)
+    while True:
+        nxt = inputf.read(1)
+        if nxt == '@':
+            nxt2 = inputf.read(1)
+            if nxt2 == '@':
+                continue
+            else:
+                break
+    if nxt2 == '\n':
+        outputf.write("@\n")
+    else:
+        sys.stderr.write("cvsreduce: fatal error, @ trailer not followed by newline (%s).\n" % nxt2)
+        sys.exit(1)
+
+def hash_escaped_text(inputf, outputf):
+    "Replace text between @ delimiters with its MD5 hash."
+    leader = inputf.read(1)
+    if leader != '@':
+        sys.stderr.write("cvsreduce: fatal error, @ leader not where expected.\n")
+        sys.exit(1)
+    txt = ""
+    while True:
+        nxt = inputf.read(1)
+        if nxt == '@':
+            nxt2 = inputf.read(1)
+            if nxt2 == '@':
+                txt += "@"
+                continue
+            else:
+                break
+        txt += nxt
+    if nxt2 == '\n':
+        m = hashlib.md5()
+        m.update(txt)
+        outputf.write("@%s\n@\n" % m.hexdigest())
+    else:
+        sys.stderr.write("cvsreduce: fatal error, @ trailer not followed by newline (%s).\n" % nxt2)
+        sys.exit(1)
+
+
+def skeletonize(inputf, outputf):
+    "Skeletonize a CVS master, discarding content but leaving metadata."
+    state = "ini"
+    last_version = None
+    deltacount = 0
+    while True:
+        line = inputf.readline()
+        if not line:
+            break
+        if verbose > 1:
+            sys.stderr.write("%s: %s\n" % (state, line.strip()))
+        if state == 'ini':
+            if line.startswith("symbols"):
+                state = "sym"
+            elif line[0].isdigit():
+                last_version = line.strip()
+            elif line.startswith("log"):
+                if strip_logs:
+                    outputf.write(line)
+                    hash_escaped_text(inputf, outputf)
+                    continue
+            elif line.startswith("text"):
+                if strip_content:
+                    outputf.write(line)
+                    txt = "%s content for %s\n" % (inputf.name, last_version)
+                    if deltacount > 0:
+                        txt = "d1 1\na1 1\n" + txt
+                    deltacount += 1
+                    replace_escaped_text(inputf, txt, outputf)
+                    continue
+        elif state == "sym":
+            if not line[0] in (' ', '\t'):
+                state = "ini"
+            elif strip_tags and '0' not in line.split(":")[1]:
+                if line.endswith(";\n"):
+                    outputf.write("\t;\n")
+                continue
+        outputf.write(line)
+
+if __name__ == '__main__':
+    (opts, arguments) = getopt.getopt(sys.argv[1:], "ctlo:v")
+    outdir = None
+    for (opt, arg) in opts:
+        if opt == '-t':
+            strip_tags = False
+        elif opt == '-l':
+            strip_logs = False
+        elif opt == '-c':
+            strip_content = False
+        elif opt == '-o':
+            outdir = arg
+        elif opt == '-v':
+            verbose += 1
+
+    if not arguments:
+        skeletonize(sys.stdin, sys.stdout)
+        sys.exit(0)
+    elif not os.path.isdir(arguments[0]):
+        sys.stderr.write("cvsreduce: argument must be a directory.\n")
+        sys.exit(1)
+
+    originals = arguments[0]
+    if not outdir:
+        outdir = originals + "-reduced"
+    if os.path.exists(outdir):
+        sys.stderr.write("cvsreduce: refusing to step on %s.\n" % outdir)
+        sys.exit(1)
+
+    # Directory traversal
+    for dirName, subdirList, fileList in os.walk(originals):
+        path_parts = list(dirName.split(os.sep))
+        path_parts.pop(0)
+        newparts = [outdir] + path_parts
+        for i in range(len(newparts)):
+            newdir = os.path.join(*newparts[:i+1])
+            if not os.path.exists(newdir):
+                if verbose:
+                    print("Directory creation: %s" % newdir)
+                os.mkdir(newdir)
+        for fname in fileList:
+            oldname = os.path.join(dirName, fname)
+            newpath = newparts + [fname]
+            newname = os.path.join(*newpath)
+            if verbose > 0:
+                print('%s -> %s' % (oldname, newname))
+            old = open(oldname, "r")
+            new = open(newname, "w")
+            skeletonize(old, new)
+            old.close()
+            new.close()
+
+# end

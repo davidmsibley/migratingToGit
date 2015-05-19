@@ -1,0 +1,17 @@
+## trunk tip older than vendor branch tip
+
+At version 1.26, produced a content mismatch:
+
+esr@snark:~/WWW/cvs-fast-export/tests$ cvsconvert -n oldhead.testrepo
+cvsconvert: processing oldhead.testrepo/module
+cvs-fast-export: Unnumbered head import-1.1.1 in ChangeLog
+cvs-fast-export: no commitids before 2006-06-30T13:21:39Z.
+oldhead.testrepo branch master: oldhead.testrepo.checkout/Makefile.am and oldhead.testrepo-git/Makefile.am are different.
+--- oldhead.testrepo.checkout/Makefile.am	2014-11-24 14:27:37.227257132 -0500
++++ oldhead.testrepo-git/Makefile.am	2014-11-24 14:27:37.215256857 -0500
+@@ -1 +1 @@
+-Makefile.am,v content for 1.2
++Makefile.am,v content for 1.1.1.1
+
+This problem was solved by the commit labeled 'Major simplification
+and improvement of vendor branch handling.'
