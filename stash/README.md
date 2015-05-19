@@ -22,7 +22,7 @@ git svn clone https://cida-svn.er.usgs.gov/repos/dev/usgs/gcmrc/gcmrc-ui-parent/
 
 This is a standard git svn clone with a couple of extras on here.  
 
-* [The Authors file](https://github.com/davidmsibley/migratingToGit/tree/master/stash#the-authors-file) is a compiled list of SVN users with their email addresses mapped.
+* [The Authors file](#the-authors-file) is a compiled list of SVN users with their email addresses mapped.
   * You can pick up a complete list here: [cidaSvnUsers.txt](https://github.com/davidmsibley/migratingToGit/blob/master/cidaSvnUsers.txt)
 * `--no-metadata` just removes the ugly git-svn-id hash from every commit message.
 * `-s` means standard layout.  CIDA projects usually have a standard layout.  Standard layout means these folders exist:
