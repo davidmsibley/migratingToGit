@@ -131,7 +131,7 @@ shell request failed on channel 0
 
 That means success.
  
- ### The Authors File
+### The Authors File
 
  The git svn clone will fail if there is a committer in history that is not in that authors file, so we would have to edit this file every time there is a new committer to svn.
  
