@@ -22,7 +22,7 @@ git svn clone https://cida-svn.er.usgs.gov/repos/dev/usgs/gcmrc/gcmrc-ui-parent/
 
 This is a standard git svn clone with a couple of extras on here.  
 
-The Authors file is a compiled list of SVN users with their email addresses mapped.  You can pick up a complete list here: cidaSvnUsers.txt
+[The Authors file](https://github.com/davidmsibley/migratingToGit/tree/master/stash#the-authors-file) is a compiled list of SVN users with their email addresses mapped.  You can pick up a complete list here: [cidaSvnUsers.txt](https://github.com/davidmsibley/migratingToGit/blob/master/cidaSvnUsers.txt)
 
 * `--no-metadata` just removes the ugly git-svn-id hash from every commit message.
 * `-s` means standard layout.  CIDA projects usually have a standard layout.  Standard layout means these folders exist:
@@ -43,7 +43,7 @@ git for-each-ref refs/remotes/tags | cut -d / -f 4- | grep -v @ | while read tag
 git for-each-ref refs/remotes | cut -d / -f 3- | grep -v @ | while read branchname; do git branch "$branchname" "refs/remotes/$branchname"; git branch -r -d "$branchname"; done
 ```
 
-Change directory to your project's root directory, then run those two commands verbatim.  The first one move the svn tags from the "refs/remotes/tags/im-a-tag" ref to being actual tags within git, then removes those old refs.  The second one just renames the branches to normal branch names and removes the old ones.  This is where the magic happens, and makes your project look like it's always been tracked by git.
+Change directory to your project's root directory, then run those two commands verbatim.  The first one move the svn tags from the `refs/remotes/tags/im-a-tag` ref to being actual tags within git, then removes those old refs.  The second one just renames the branches to normal branch names and removes the old ones.  This is where the magic happens, and makes your project look like it's always been tracked by git.
 
 #### Step 3: Create A Project and a Repository in Internal Stash
 
@@ -80,7 +80,7 @@ Your fancy new Stash repository page has a couple of essential buttons at the to
 
 http://cida-eros-stash.er.usgs.gov:7990/stash/users/dmsibley/repos/gcmrc-ui-parent/browse
 
-now when I click the clone button it gives me the address of "ssh://git@cida-eros-stash.er.usgs.gov:7999/~dmsibley/gcmrc-ui-parent.git"  We'll use that to set up our new local repo
+now when I click the clone button it gives me the address of `ssh://git@cida-eros-stash.er.usgs.gov:7999/~dmsibley/gcmrc-ui-parent.git`  We'll use that to set up our new local repo
 
 ```
 git clone ssh://git@cida-eros-stash.er.usgs.gov:7999/~dmsibley/gcmrc-ui-parent.git
