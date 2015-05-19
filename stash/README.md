@@ -114,7 +114,7 @@ cd gcmrc-ui-parent
 git remote add upstream ssh://git@cida-eros-stash.er.usgs.gov:7999/gcmrc/gcmrc-ui-parent.git
 ```
 
-Accepting the Certificate
+### Accepting the Certificate
 In order for your Jenkins machine to contact stash via ssh, you'll need Stash to know your tomcat's ssh public key.
 Ask someone who has the Jenkins user credentials for stash to add your tomcat's public key (Sibley or Ivan are your best bets).
 Next run this command from the Jenkins machine terminal:
@@ -131,4 +131,22 @@ shell request failed on channel 0
 
 That means success.
  
+ ### The Authors File
+
+ The git svn clone will fail if there is a committer in history that is not in that authors file, so we would have to edit this file every time there is a new committer to svn.
  
+the file attached to this document was generated using
+
+```
+svn log https://cida-svn.er.usgs.gov/repos/dev/usgs/ --xml | grep -P "^<author" | sort -u | perl -pe 's/<author>(.*?)<\/author>/$1 = /' > users.txt
+```
+
+and then manually edited to add in emails and names.
+ 
+The thing about this is that you don't necessarily have to use/edit the file of the whole repo.  If I'm importing gcmrc-ui-parent and I notice that a new guy has made some commits to it, I can run my own users file (that will run a LOT quicker) on the project.
+
+```
+svn log https://cida-svn.er.usgs.gov/repos/dev/usgs/gcmrc/gcmrc-ui-parent/ --xml | grep -P "^<author" | sort -u | perl -pe 's/<author>(.*?)<\/author>/$1 = /' > users.txt
+```
+
+and then manually edit that for the 5 or 6 users that are in there.
