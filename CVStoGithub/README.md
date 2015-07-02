@@ -3,7 +3,9 @@
 ## Usage
 
 ```console
-export.sh <CVS Hostname> <Project Parent Directory> <Project Root Directory Name> <github username> <git repo name> <cvs_fast_export directory>
+export.sh <CVS Hostname> <Project Parent Directory> <Project Root Directory Name> <git repo name> <cvs_fast_export directory>
+cd <git repo name>
+../pushToGithub.sh <github username> <git repo name>
 ```
 
 First create an empty repository in your user on github, and run the export.sh with the repository name.

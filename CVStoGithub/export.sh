@@ -2,10 +2,9 @@
 CVS_HOSTNAME=$1
 REPOSITORY=$3
 REPOSITORY_DIR=$2$REPOSITORY
-GITHUB_USERNAME=$4
-GIT_REPO_NAME=$5
+GIT_REPO_NAME=$4
 MAKE_AUTHORMAP=$(echo $0 | sed -r s/export\.sh$/mkAuthormap.sh/)
-CVS_FAST_EXPORT_DIR=$6
+CVS_FAST_EXPORT_DIR=$5
 
 ssh $CVS_HOSTNAME "tar cvf - $REPOSITORY_DIR | gzip > export.tar.gz"
 ssh $CVS_HOSTNAME "bash -s" < $MAKE_AUTHORMAP $REPOSITORY_DIR
@@ -20,6 +19,3 @@ cd $GIT_REPO_NAME
 git init
 cat ../web-fast-export | git fast-import
 git checkout
-git remote add origin git@github.com:$GITHUB_USERNAME/$GIT_REPO_NAME.git
-git push --all origin
-git push --tags origin
