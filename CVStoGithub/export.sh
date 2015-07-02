@@ -4,10 +4,11 @@ REPOSITORY=$3
 REPOSITORY_DIR=$2$REPOSITORY
 GITHUB_USERNAME=$4
 GIT_REPO_NAME=$5
+MAKE_AUTHORMAP=$(echo $0 | sed -r s/export\.sh$/mkAuthormap.sh/)
 CVS_FAST_EXPORT_DIR=$6
 
 ssh $CVS_HOSTNAME "tar cvf - $REPOSITORY_DIR | gzip > export.tar.gz"
-ssh $CVS_HOSTNAME "bash -s" < ../../mkAuthormap.sh $REPOSITORY_DIR
+ssh $CVS_HOSTNAME "bash -s" < $MAKE_AUTHORMAP $REPOSITORY_DIR
 scp $CVS_HOSTNAME:~/export.tar.gz .
 scp $CVS_HOSTNAME:~/authormap .
 ssh $CVS_HOSTNAME "rm -f export.tar.gz"
