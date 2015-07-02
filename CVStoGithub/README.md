@@ -15,5 +15,7 @@ you may have to edit export.sh
 ```console
 mkdir corenwis-migration
 cd corenwis-migration
-../export.sh nwiscvs.er.usgs.gov /nwiscvs/nwis/NwisJava/ corenwis davidmsibley corenwis ../cvs-fast-export-1.29
+../export.sh nwiscvs.er.usgs.gov /nwiscvs/nwis/NwisJava/ corenwis corenwis ../cvs-fast-export-1.29
+cd corenwis
+../../pushToGithub.sh davidmsibley corenwis
 ```
